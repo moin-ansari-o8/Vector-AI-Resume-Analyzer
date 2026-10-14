@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>project_review_assessment_final.md</title>
+	<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+	<style>
+		/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+		/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+		body {
+			font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+			font-size: var(--vscode-markdown-font-size, 14px);
+			padding: 0 26px;
+			line-height: var(--vscode-markdown-line-height, 22px);
+			word-wrap: break-word;
+		}
+
+		#code-csp-warning {
+			position: fixed;
+			top: 0;
+			right: 0;
+			color: white;
+			margin: 16px;
+			text-align: center;
+			font-size: 12px;
+			font-family: sans-serif;
+			background-color: #444444;
+			cursor: pointer;
+			padding: 6px;
+			box-shadow: 1px 1px 1px rgba(0, 0, 0, .25);
+		}
+
+		#code-csp-warning:hover {
+			text-decoration: none;
+			background-color: #007acc;
+			box-shadow: 2px 2px 2px rgba(0, 0, 0, .25);
+		}
+
+		body.scrollBeyondLastLine {
+			margin-bottom: calc(100vh - 22px);
+		}
+
+		body.showEditorSelection .code-line {
+			position: relative;
+		}
+
+		body.showEditorSelection .code-active-line:before,
+		body.showEditorSelection .code-line:hover:before {
+			content: "";
+			display: block;
+			position: absolute;
+			top: 0;
+			left: -12px;
+			height: 100%;
+		}
+
+		body.showEditorSelection li.code-active-line:before,
+		body.showEditorSelection li.code-line:hover:before {
+			left: -30px;
+		}
+
+		.vscode-light.showEditorSelection .code-active-line:before {
+			border-left: 3px solid rgba(0, 0, 0, 0.15);
+		}
+
+		.vscode-light.showEditorSelection .code-line:hover:before {
+			border-left: 3px solid rgba(0, 0, 0, 0.40);
+		}
+
+		.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+			border-left: none;
+		}
+
+		.vscode-dark.showEditorSelection .code-active-line:before {
+			border-left: 3px solid rgba(255, 255, 255, 0.4);
+		}
+
+		.vscode-dark.showEditorSelection .code-line:hover:before {
+			border-left: 3px solid rgba(255, 255, 255, 0.60);
+		}
+
+		.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+			border-left: none;
+		}
+
+		.vscode-high-contrast.showEditorSelection .code-active-line:before {
+			border-left: 3px solid rgba(255, 160, 0, 0.7);
+		}
+
+		.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+			border-left: 3px solid rgba(255, 160, 0, 1);
+		}
+
+		.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+			border-left: none;
+		}
+
+		img {
+			max-width: 100%;
+			max-height: 100%;
+		}
+
+		a {
+			text-decoration: none;
+		}
+
+		a:hover {
+			text-decoration: underline;
+		}
+
+		a:focus,
+		input:focus,
+		select:focus,
+		textarea:focus {
+			outline: 1px solid -webkit-focus-ring-color;
+			outline-offset: -1px;
+		}
+
+		hr {
+			border: 0;
+			height: 2px;
+			border-bottom: 2px solid;
+		}
+
+		h1 {
+			padding-bottom: 0.3em;
+			line-height: 1.2;
+			border-bottom-width: 1px;
+			border-bottom-style: solid;
+		}
+
+		h1,
+		h2,
+		h3 {
+			font-weight: normal;
+		}
+
+		table {
+			border-collapse: collapse;
+		}
+
+		table>thead>tr>th {
+			text-align: left;
+			border-bottom: 1px solid;
+		}
+
+		table>thead>tr>th,
+		table>thead>tr>td,
+		table>tbody>tr>th,
+		table>tbody>tr>td {
+			padding: 5px 10px;
+		}
+
+		table>tbody>tr+tr>td {
+			border-top: 1px solid;
+		}
+
+		blockquote {
+			margin: 0 7px 0 5px;
+			padding: 0 16px 0 10px;
+			border-left-width: 5px;
+			border-left-style: solid;
+		}
+
+		code {
+			font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+			font-size: 1em;
+			line-height: 1.357em;
+		}
+
+		body.wordWrap pre {
+			white-space: pre-wrap;
+		}
+
+		pre:not(.hljs),
+		pre.hljs code>div {
+			padding: 16px;
+			border-radius: 3px;
+			overflow: auto;
+		}
+
+		pre code {
+			color: var(--vscode-editor-foreground);
+			tab-size: 4;
+		}
+
+		/** Theming */
+
+		.vscode-light pre {
+			background-color: rgba(220, 220, 220, 0.4);
+		}
+
+		.vscode-dark pre {
+			background-color: rgba(10, 10, 10, 0.4);
+		}
+
+		.vscode-high-contrast pre {
+			background-color: rgb(0, 0, 0);
+		}
+
+		.vscode-high-contrast h1 {
+			border-color: rgb(0, 0, 0);
+		}
+
+		.vscode-light table>thead>tr>th {
+			border-color: rgba(0, 0, 0, 0.69);
+		}
+
+		.vscode-dark table>thead>tr>th {
+			border-color: rgba(255, 255, 255, 0.69);
+		}
+
+		.vscode-light h1,
+		.vscode-light hr,
+		.vscode-light table>tbody>tr+tr>td {
+			border-color: rgba(0, 0, 0, 0.18);
+		}
+
+		.vscode-dark h1,
+		.vscode-dark hr,
+		.vscode-dark table>tbody>tr+tr>td {
+			border-color: rgba(255, 255, 255, 0.18);
+		}
+	</style>
+
+	<style>
+		/* Tomorrow Theme */
+		/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+		/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+		/* Tomorrow Comment */
+		.hljs-comment,
+		.hljs-quote {
+			color: #8e908c;
+		}
+
+		/* Tomorrow Red */
+		.hljs-variable,
+		.hljs-template-variable,
+		.hljs-tag,
+		.hljs-name,
+		.hljs-selector-id,
+		.hljs-selector-class,
+		.hljs-regexp,
+		.hljs-deletion {
+			color: #c82829;
+		}
+
+		/* Tomorrow Orange */
+		.hljs-number,
+		.hljs-built_in,
+		.hljs-builtin-name,
+		.hljs-literal,
+		.hljs-type,
+		.hljs-params,
+		.hljs-meta,
+		.hljs-link {
+			color: #f5871f;
+		}
+
+		/* Tomorrow Yellow */
+		.hljs-attribute {
+			color: #eab700;
+		}
+
+		/* Tomorrow Green */
+		.hljs-string,
+		.hljs-symbol,
+		.hljs-bullet,
+		.hljs-addition {
+			color: #718c00;
+		}
+
+		/* Tomorrow Blue */
+		.hljs-title,
+		.hljs-section {
+			color: #4271ae;
+		}
+
+		/* Tomorrow Purple */
+		.hljs-keyword,
+		.hljs-selector-tag {
+			color: #8959a8;
+		}
+
+		.hljs {
+			display: block;
+			overflow-x: auto;
+			color: #4d4d4c;
+			padding: 0.5em;
+		}
+
+		.hljs-emphasis {
+			font-style: italic;
+		}
+
+		.hljs-strong {
+			font-weight: bold;
+		}
+	</style>
+
+	<style>
+		/*
+ * Markdown PDF CSS
+ */
+
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+			padding: 0 12px;
+		}
+
+		pre {
+			background-color: #f8f8f8;
+			border: 1px solid #cccccc;
+			border-radius: 3px;
+			overflow-x: auto;
+			white-space: pre-wrap;
+			overflow-wrap: break-word;
+		}
+
+		pre:not(.hljs) {
+			padding: 23px;
+			line-height: 19px;
+		}
+
+		blockquote {
+			background: rgba(127, 127, 127, 0.1);
+			border-color: rgba(0, 122, 204, 0.5);
+		}
+
+		.emoji {
+			height: 1.4em;
+		}
+
+		code {
+			font-size: 14px;
+			line-height: 19px;
+		}
+
+		/* for inline code */
+		:not(pre):not(.hljs)>code {
+			color: #C9AE75;
+			/* Change the old color so it seems less like an error */
+			font-size: inherit;
+		}
+
+		/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+		.page {
+			page-break-after: always;
+		}
+	</style>
+
+	<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+
+<body>
+	<script>
+		mermaid.initialize({
+			startOnLoad: true,
+			theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+				? 'dark'
+				: 'default'
+		});
+	</script>
+	<h1 id="project-review">PROJECT REVIEW</h1>
+	<p><strong>Reg. No &amp; Name</strong></p>
+	<ul>
+		<li>Ansari Moinuddin M - 26MAG0043</li>
+		<li>Mohammad Saad - 26MAG0061</li>
+		<li>Iman Huda - 26MAG0095</li>
+	</ul>
+	<h1
+		id="intelligent-resume-analysis-and-job-recommendation-system-using-retrieval-augmented-generation-and-large-language-models">
+		Intelligent Resume Analysis and Job Recommendation System using Retrieval-Augmented Generation and Large
+		Language Models</h1>
+	<!-- <hr> -->
+	<h2 id="introduction">Introduction</h2>
+	<p>In the current professional landscape,the rapid evolution oftechnology and the integration of Artificial
+		Intelligence have fundamentally altered career development and job recruitment. As industries shifttoward more
+		skill-centric hiring models, job seekers face the challenge of aligning their profiles with complex, changing
+		marketrequirements. This project,&quot;Intelligent Resume Analysis and Job Recommendation System,&quot;
+		addresses these challenges by leveraging advanced techniques such as Retrieval-Augmented Generation (RAG) and
+		Large Language Models (LLMs)to provide a dynamic, intelligent, and personalized career-readiness platform.By
+		moving beyond traditional keyword-based screening,this system enables comprehensive skill assessment, gap
+		analysis, and tailored career guidance, helping candidates navigate the future of work with precision and
+		confidence.</p>
+	<h2 id="abstract">Abstract</h2>
+	<p>The rapid growth of Artificial Intelligence is transforming the modern job market, introducing new roles while
+		continuously changing the skills required for existing professions. In this changing environment,traditional
+		resume screening systems that primarily compare keywords with job descriptions may not provide meaningful
+		guidance to job seekers. This project proposes an AI-Powered Career Intelligence System that goes beyond
+		conventional resume analysis by evaluating a candidate's skills, experience, projects, and career readiness in
+		the context ofthe evolving AI-driven workforce.</p>
+	<p>The system accepts a candidate's resume and extracts relevantinformation such as technical skills, education,
+		experience, projects, and certifications using Natural Language Processing techniques. The extracted information
+		is converted into semantic embeddings and stored in a vector database, enabling the system to understand
+		relationships between a candidate's profile, job descriptions, and required skills beyond simple keyword
+		matching. Using Retrieval-Augmented Generation (RAG), relevantinformation is retrieved and provided to a Large
+		Language Modelfor contextual analysis.</p>
+	<p>Instead of producing only a resume score,the system generates a personalized career intelligence report
+		containing the candidate's strengths, skill gaps, emerging skills they may need to develop, suitable career
+		paths, relevantjob opportunities, ATS compatibility, and actionable resume improvementrecommendations. It can
+		also provide an interactive AI-based conversation where users can ask questions abouttheir career profile and
+		receive context-aware guidance.</p>
+	<p>The primary objective ofthe projectis to transform resume analysis from a static evaluation process into an
+		intelligent career-readiness system capable of adapting to the rapidly changing demands ofthe AI era.By
+		combining Python, Natural Language Processing, semantic search, vector databases, Retrieval-Augmented
+		Generation, and Large Language Models,the proposed system aims to help individuals understand not only where
+		they currently stand, but also how they can prepare themselves forthe jobs ofthe future.</p>
+	<p><strong>Keywords:</strong> Artificial intelligence, Resume Retrieval, Natural Language Processing, Large Language
+		Models, Retrieval-Augmented Generation, Semantic Search, Career Guidance</p>
+	<h2 id="3-proposed-work-vector-ai-resume-intelligence">3. Proposed Work (VECTOR AI Resume Intelligence)</h2>
+	<h3 id="31-overview-of-the-system">3.1 Overview of the System</h3>
+	<p>The proposed system is an end-to-end web application consisting of a highly responsive React/Vite frontend and a
+		powerful FastAPI Python backend. The system ingests PDF resumes, extracts text, cleans it, and identifies named
+		entities (skills, education, job titles). It then converts these profiles into mathematical vectors. When a job
+		description is provided, the system performs a semantic search to find the closest matching candidates and uses
+		an LLM to justify the decision.</p>
+	<h3 id="32-key-objectives">3.2 Key Objectives</h3>
+	<ol>
+		<li><strong>Semantic Matching:</strong> Move beyond keyword intersection to true semantic understanding.</li>
+		<li><strong>Explainability (XAI):</strong> Eliminate the &quot;black box&quot; by generating LLM-driven
+			justifications for every match score.</li>
+		<li><strong>Skill Gap Analysis:</strong> Identify exactly which required skills a candidate possesses and which
+			they are missing.</li>
+		<li><strong>High Performance:</strong> Ensure sub-second search times using modern vector database technologies.
+		</li>
+	</ol>
+	<h3 id="33-improvement-over-existing-work-deep-dive">3.3 Improvement Over Existing Work (Deep Dive)</h3>
+	<p>Existing ATS platforms rely on relational databases and full-text search engines (like Elasticsearch) configured
+		for keyword matching.
+		Our improvement introduces <strong>Retrieval-Augmented Generation (RAG)</strong>. Instead of querying a database
+		for a keyword, we embed the entire job description into a high-dimensional vector space. We then retrieve the
+		resumes that exist closest to that point in space. Once retrieved, we augment the prompt of a Large Language
+		Model with this context, asking the LLM to act as a seasoned technical recruiter to explain the match. This
+		entirely replaces the outdated Boolean search logic with true artificial intelligence.</p>
+	<h2 id="4-architectural-comparison-previous-model-vs-current-model">4. Architectural Comparison: Previous Model vs.
+		Current Model</h2>
+	<h3 id="41-feature-by-feature-comparison-matrix">4.1 Feature-by-Feature Comparison Matrix</h3>
+	<table>
+		<thead>
+			<tr>
+				<th style="text-align:left">Feature</th>
+				<th style="text-align:left">Previous Model (Traditional ATS)</th>
+				<th style="text-align:left">Current Model (VECTOR AI Analyzer)</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td style="text-align:left"><strong>Matching Mechanism</strong></td>
+				<td style="text-align:left">Exact keyword intersection (Regex / Boolean).</td>
+				<td style="text-align:left">Semantic similarity using <code>sentence-transformers</code> and vector
+					embeddings.</td>
+			</tr>
+			<tr>
+				<td style="text-align:left"><strong>Context Awareness</strong></td>
+				<td style="text-align:left">Low. Cannot differentiate between &quot;used Python for 5 years&quot; vs
+					&quot;read about Python&quot;.</td>
+				<td style="text-align:left">High. Uses <code>spaCy</code> NLP to accurately extract skills tied to
+					specific years of experience.</td>
+			</tr>
+			<tr>
+				<td style="text-align:left"><strong>Database Architecture</strong></td>
+				<td style="text-align:left">Relational databases (SQL) storing raw text.</td>
+				<td style="text-align:left"><strong>ChromaDB</strong> (Vector Database) for fast, similarity-based
+					mathematical nearest-neighbor search.</td>
+			</tr>
+			<tr>
+				<td style="text-align:left"><strong>Explainability</strong></td>
+				<td style="text-align:left">None. Outputs an arbitrary percentage score.</td>
+				<td style="text-align:left">High. Uses <strong>Ollama (LLM)</strong> to generate detailed paragraphs
+					explaining matched skills and highlighting missing skill gaps.</td>
+			</tr>
+			<tr>
+				<td style="text-align:left"><strong>Candidate Feedback</strong></td>
+				<td style="text-align:left">Usually none (candidates are silently rejected).</td>
+				<td style="text-align:left">Generates actionable &quot;Resume Improvement Plans&quot; to help candidates
+					bridge skill gaps.</td>
+			</tr>
+		</tbody>
+	</table>
+	<h2 id="5-system-architecture-and-methodology">5. System Architecture and Methodology</h2>
+	<p>The system is designed using a modern micro-architecture, ensuring a clear separation of concerns between the
+		user interface, the API routing, and the heavy machine-learning workloads.</p>
+	<h3 id="51-architecture-diagram">5.1 Architecture Diagram</h3>
+	<p><img src="frontend/public/a_clean_minimalist_infographic_architecture_diagra.png" alt="Architecture Diagram"></p>
+	<h3 id="52-frontend-layer-react-vite-zustand">5.2 Frontend Layer (React, Vite, Zustand)</h3>
+	<p>The presentation layer is built using <strong>React 19</strong> and bundled with <strong>Vite</strong> for
+		lightning-fast hot module replacement. We utilized <strong>Tailwind CSS v4</strong> for a clean, minimalist, and
+		highly responsive dark-themed UI. For global state management across the dashboard, we implemented
+		<strong>Zustand</strong>, which manages the active job selections and candidate data without the boilerplate of
+		Redux.</p>
+	<h3 id="53-backend-api-layer-fastapi">5.3 Backend API Layer (FastAPI)</h3>
+	<p>The backend is driven by <strong>FastAPI</strong>, chosen for its asynchronous capabilities and high performance.
+		It serves as the routing bridge, handling incoming multipart form data (PDF uploads), validating payloads using
+		Pydantic schemas, and routing data to the appropriate ML services.</p>
+	<h3 id="54-nlp--data-extraction-pipeline">5.4 NLP &amp; Data Extraction Pipeline</h3>
+	<p>When a resume is uploaded:</p>
+	<ol>
+		<li><strong>PyMuPDF</strong> extracts the raw text from the document.</li>
+		<li>A custom text-cleaning pipeline removes erratic formatting, stop words, and noise.</li>
+		<li><strong>spaCy</strong> (an industry-standard NLP library) is used for Named Entity Recognition (NER) to
+			extract specific entities such as programming languages, certifications, and educational degrees.</li>
+		<li>Regex and pattern matching are applied contextually to determine years of experience for specific skills.
+		</li>
+	</ol>
+	<h3 id="55-vector-embeddings-and-storage-chromadb">5.5 Vector Embeddings and Storage (ChromaDB)</h3>
+	<p>Instead of matching raw text strings, the cleaned text is passed through <code>sentence-transformers</code>
+		(e.g., <code>all-MiniLM-L6-v2</code>) which converts the text into dense numerical vectors (embeddings). These
+		embeddings are stored in <strong>ChromaDB</strong>, an open-source vector database. When a job description is
+		processed, it is also embedded, and ChromaDB calculates the cosine similarity to find the &quot;nearest
+		neighbors&quot;—representing the most semantically relevant resumes.</p>
+	<h3 id="56-explainability-engine-llm--rag">5.6 Explainability Engine (LLM / RAG)</h3>
+	<p>Once the top matches are retrieved from ChromaDB, they are passed to the <strong>Explainability Engine</strong>.
+		This engine utilizes an LLM (accessed via Ollama or an external LLM API). The system injects the candidate's
+		parsed skills, the job requirements, and the similarity score into a prompt, instructing the LLM to generate a
+		human-readable justification. This represents the &quot;Generation&quot; phase of the RAG pipeline.</p>
+	<h3 id="57-persistence-layer-relational-db---proposed">5.7 Persistence Layer (Relational DB - Proposed)</h3>
+	<p>While ChromaDB handles the vector indices, a traditional relational database (SQLite/PostgreSQL) is proposed
+		alongside it to permanently store candidate metadata (names, emails), track match history over time, and build
+		long-term talent pools.</p>
+	<h2 id="6-implementation-details-what-we-actually-built">6. Implementation Details: What We Actually Built</h2>
+	<p>During the development and integration phase, several critical technical implementations were carried out to
+		connect the frontend to the backend AI models seamlessly. Here is a detailed breakdown of the exact development
+		work completed:</p>
+	<h3 id="61-frontend-integration-and-state-management">6.1 Frontend Integration and State Management</h3>
+	<ul>
+		<li><strong>Dynamic Job Inputs:</strong> We wired up the <code>JobInputForm.tsx</code> component to correctly
+			capture job titles, companies, and descriptions, and linked it to the backend <code>/jobs/process</code> API
+			endpoint.</li>
+		<li><strong>State Persistence (Stopgap):</strong> Because the backend currently operates in a stateless manner
+			(relying only on ChromaDB for vectors but lacking a relational DB for entity storage), we engineered a
+			frontend caching layer. We updated <code>resume.service.ts</code>, <code>job.service.ts</code>, and
+			<code>matching.service.ts</code> to utilize browser <code>localStorage</code>. This ensures that when a user
+			refreshes the page, their uploaded resumes and processed jobs survive the session reload.</li>
+		<li><strong>UI/UX Polishing:</strong> We applied custom dark-themed Webkit scrollbar styles to
+			<code>globals.css</code> to ensure the entire application respected the premium, dark-mode aesthetic of the
+			dashboard, and replaced hardcoded mock data in the Overview dashboard (<code>StatsRow.tsx</code>,
+			<code>RecentMatchesTable.tsx</code>) with real data derived from the Zustand stores.</li>
+	</ul>
+	<h3 id="62-backend-api-and-cors-resolution">6.2 Backend API and CORS Resolution</h3>
+	<ul>
+		<li><strong>CORS Configuration:</strong> We resolved Cross-Origin Resource Sharing (CORS) blocks in the FastAPI
+			<code>app/main.py</code> file, allowing the React development server (running on a different port) to
+			successfully communicate with the Python backend without security rejections.</li>
+		<li><strong>Stateless Processing:</strong> Implemented the <code>POST /resume/upload</code> endpoint, which
+			temporarily saves the PDF to an <code>uploads/</code> directory, extracts the text, runs it through the
+			<code>spaCy</code> NLP pipeline, calculates initial skill scores, and returns a massive structured JSON
+			object back to the client instantaneously.</li>
+	</ul>
+	<h3 id="63-explainability-panel-debugging">6.3 Explainability Panel Debugging</h3>
+	<ul>
+		<li><strong>React Rendering Fixes:</strong> During the integration of the LLM explainability feature, we
+			encountered a critical application crash:
+			<code>Uncaught Error: Objects are not valid as a React child</code>. This occurred because the FastAPI
+			backend was returning the LLM's explanation as a nested JSON object (containing fields like
+			<code>job_id</code>, <code>semantic_score</code>, <code>matched_skills</code>, etc.), but the React frontend
+			(<code>ExplainabilityPanel.tsx</code>) was attempting to render the raw object directly into the DOM.</li>
+		<li><strong>The Solution:</strong> We intercepted the response in the <code>matching.service.ts</code> layer and
+			parsed the structured JSON from the backend into a beautifully formatted, human-readable Markdown string.
+			This allowed the <code>ExplainabilityPanel</code> to safely render the LLM's detailed reasoning,
+			successfully displaying the matched skills and missing skills dynamically.</li>
+	</ul>
+	<h2 id="7-results-and-performance-analysis">7. Results and Performance Analysis</h2>
+	<p>The implementation of this architecture yields the following results:</p>
+	<ol>
+		<li><strong>Significantly Higher Accuracy:</strong> By understanding semantic equivalents (e.g., mapping
+			&quot;Node.js&quot; closely to &quot;Backend JavaScript&quot;), the system drastically reduces false
+			negatives—ensuring good candidates are not rejected due to missing exact keywords.</li>
+		<li><strong>Transparent Recruiting:</strong> Recruiters are no longer forced to blindly trust an AI score. For
+			every candidate, they receive a detailed, human-readable justification highlighting exactly why the
+			candidate fits the role.</li>
+		<li><strong>Reduced Bias:</strong> By evaluating pure semantic skill alignment and contextual experience rather
+			than formatting, keyword stuffing, or demographic indicators, the evaluation becomes inherently fairer and
+			objective.</li>
+		<li><strong>Real-time Processing:</strong> The decoupled micro-architecture (FastAPI backend + React frontend)
+			allows for lightning-fast vector similarity searches. Parsing a resume, embedding it, and returning a match
+			score happens in a matter of seconds, providing instantaneous dashboard updates.</li>
+	</ol>
+	<h2 id="8-challenges-faced-and-solutions">8. Challenges Faced and Solutions</h2>
+	<ul>
+		<li><strong>Challenge 1: Backend/Frontend Communication Blocks</strong>
+			<ul>
+				<li><em>Issue:</em> The React frontend failed to send PDFs to the backend due to CORS policy
+					restrictions.</li>
+				<li><em>Solution:</em> Configured the <code>CORSMiddleware</code> in FastAPI to explicitly allow
+					origins, credentials, and methods from the frontend dev server.</li>
+			</ul>
+		</li>
+		<li><strong>Challenge 2: React State Rendering Errors (Object as Child)</strong>
+			<ul>
+				<li><em>Issue:</em> The frontend crashed when attempting to display the LLM's explanation because it
+					received a complex nested object instead of a string.</li>
+				<li><em>Solution:</em> Built a parsing utility within the frontend service layer to unpack the JSON and
+					format it into a string before passing it to the React component tree.</li>
+			</ul>
+		</li>
+		<li><strong>Challenge 3: Stateless Entity Tracking</strong>
+			<ul>
+				<li><em>Issue:</em> The backend lacked a relational database, meaning processed jobs and resumes were
+					lost after the HTTP request finished.</li>
+				<li><em>Solution:</em> Implemented a temporary <code>localStorage</code> persistence layer in the
+					frontend to cache data, while designing the blueprint for a full SQLite/SQLAlchemy implementation
+					for the next phase.</li>
+			</ul>
+		</li>
+	</ul>
+	<h2 id="9-future-scope">9. Future Scope</h2>
+	<p>While the current system proves the viability of Semantic Search and RAG in recruitment, several enhancements are
+		planned for future iterations:</p>
+	<ol>
+		<li><strong>Implementation of Relational Persistence:</strong> Upgrading the backend to include a full
+			PostgreSQL or SQLite database using SQLAlchemy to permanently store candidate metadata, track match history
+			over time, and build long-term talent pools.</li>
+		<li><strong>Fine-Tuning Embedding Models:</strong> Training the <code>sentence-transformers</code> model
+			specifically on IT and Engineering resumes to better capture niche domain-specific terminologies.</li>
+		<li><strong>Agentic Chatbots:</strong> Implementing an interactive chat interface where recruiters can ask the
+			LLM questions like, &quot;Which of these candidates has the most experience with distributed systems?&quot;
+			and receive contextual answers based on the ChromaDB vector indices.</li>
+	</ol>
+	<h2 id="10-conclusion">10. Conclusion</h2>
+	<p>The VECTOR AI Resume Intelligence project successfully demonstrates how modern AI techniques can completely
+		overhaul legacy Applicant Tracking Systems. By abandoning flawed keyword-matching in favor of Vector Embeddings
+		and Retrieval-Augmented Generation, we have created a system that truly understands candidate experience.</p>
+	<p>Furthermore, by integrating an Explainability Engine driven by Large Language Models, we have solved the
+		&quot;black box&quot; problem inherent in most AI recruiting tools. This project proves that AI can be used not
+		just to automate recruitment, but to make it fairer, more accurate, and entirely transparent.</p>
+
+</body>
+
+</html>

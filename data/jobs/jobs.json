@@ -1,0 +1,37 @@
+[
+  {
+    "job_id": "JOB001",
+    "title": "Python Backend Developer",
+    "company": "ABC Technologies",
+    "location": "Chennai",
+    "description": "We are looking for a Python backend developer with experience in Python, SQL, FastAPI, Docker and AWS. Candidates should have at least 2 years of experience."
+  },
+  {
+    "job_id": "JOB002",
+    "title": "Machine Learning Engineer",
+    "company": "XYZ AI Labs",
+    "location": "Bangalore",
+    "description": "Looking for a Machine Learning Engineer with Python, machine learning, SQL, TensorFlow and deep learning experience. Candidates should have 2 years of experience."
+  },
+  {
+    "job_id": "JOB003",
+    "title": "Frontend Developer",
+    "company": "Web Solutions",
+    "location": "Hyderabad",
+    "description": "Seeking a frontend developer with JavaScript, HTML, CSS and React experience. Candidates should have at least 1 year of experience."
+  },
+  {
+    "job_id": "JOB004",
+    "title": "Data Analyst",
+    "company": "DataWorks",
+    "location": "Chennai",
+    "description": "Looking for a Data Analyst with Python, SQL, Excel and data analysis skills. Candidates should have 1 year of experience."
+  },
+  {
+    "job_id": "JOB005",
+    "title": "AI Engineer",
+    "company": "Future AI",
+    "location": "Pune",
+    "description": "We are looking for an AI Engineer with Python, artificial intelligence, machine learning, deep learning, PyTorch and NLP experience. Candidates should have 2 years of experience."
+  }
+]

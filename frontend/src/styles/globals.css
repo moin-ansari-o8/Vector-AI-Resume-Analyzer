@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-primary: #0B0C0C;
+    --bg-secondary: #111313;
+    --bg-elevated: #171919;
+    --bg-hover: #1E2020;
+
+    --text-primary: #E9E7DF;
+    --text-secondary: #959992;
+    --text-muted: #6B6F69;
+
+    --accent-primary: #C7FF4A;
+    --accent-warning: #D99A3D;
+    --accent-negative: #E66A55;
+    --accent-positive: #7FD6A1;
+
+    --border-default: #1E2020;
+    --border-hover: #2A2D2A;
+    --border-active: #C7FF4A33;
+  }
+
+  body {
+    @apply bg-bg-primary text-text-primary font-sans antialiased;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-hover);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+  }
+}
