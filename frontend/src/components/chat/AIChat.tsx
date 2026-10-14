@@ -12,12 +12,12 @@ export function AIChat() {
   
   const selectedResumeId = useResumeStore(state => state.selectedResumeId);
   const resumes = useResumeStore(state => state.resumes);
-  const activeResume = resumes.find(r => r.id === selectedResumeId);
+  const activeResume = resumes.find(r => r.id === selectedResumeId) || resumes[0];
   
   const chatContext = activeResume ? {
-    resumeText: activeResume.raw_text || '',
+    resumeText: activeResume.raw_text || Object.values(activeResume.sections || {}).join('\n\n'),
     resumeSkills: activeResume.skills,
-    resumeExperience: activeResume.experienceYears.toString()
+    resumeExperience: (activeResume.experienceYears || 0).toString()
   } : undefined;
 
   const { messages, isTyping, appendUserMessage } = useChat(chatContext);

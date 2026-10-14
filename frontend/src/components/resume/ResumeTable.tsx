@@ -1,6 +1,9 @@
 import { useNavigate } from 'react-router';
+import { Sparkles, Trash2, ExternalLink } from 'lucide-react';
 import { DataTable, type Column } from '../shared/DataTable';
 import { ROUTES } from '@/constants/routes';
+import { resumeService } from '@/services/resume.service';
+import { useToast } from '@/components/shared/Toast';
 import type { Resume } from '@/types/resume.types';
 
 interface ResumeTableProps {
@@ -9,6 +12,19 @@ interface ResumeTableProps {
 
 export function ResumeTable({ resumes }: ResumeTableProps) {
   const navigate = useNavigate();
+  const { addToast } = useToast();
+
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (confirm('Are you sure you want to delete this resume?')) {
+      try {
+        await resumeService.delete(id);
+        addToast('Resume deleted successfully', 'info');
+      } catch (err) {
+        addToast('Failed to delete resume', 'error');
+      }
+    }
+  };
 
   const columns: Column<Resume>[] = [
     {
@@ -16,7 +32,12 @@ export function ResumeTable({ resumes }: ResumeTableProps) {
       header: 'Candidate Name',
       sortable: true,
       sortFn: (a, b) => a.candidateName.localeCompare(b.candidateName),
-      render: (row) => <span className="font-medium text-text-primary">{row.candidateName}</span>,
+      render: (row) => (
+        <div>
+          <span className="font-medium text-text-primary block">{row.candidateName}</span>
+          <span className="text-[11px] text-text-muted font-mono">{row.id}</span>
+        </div>
+      ),
     },
     {
       key: 'role',
@@ -46,7 +67,7 @@ export function ResumeTable({ resumes }: ResumeTableProps) {
           error: 'text-accent-negative bg-accent-negative/10',
         };
         return (
-          <span className={`px-2 py-1 rounded text-xs font-medium uppercase tracking-wider ${colors[row.status]}`}>
+          <span className={`px-2 py-0.5 rounded text-[11px] font-medium uppercase tracking-wider ${colors[row.status]}`}>
             {row.status}
           </span>
         );
@@ -58,9 +79,31 @@ export function ResumeTable({ resumes }: ResumeTableProps) {
       sortable: true,
       sortFn: (a, b) => new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime(),
       render: (row) => (
-        <span className="text-text-muted text-sm">
+        <span className="text-text-muted text-xs">
           {new Date(row.uploadedAt).toLocaleDateString()}
         </span>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      render: (row) => (
+        <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+          <button
+            onClick={() => navigate(`${ROUTES.IMPROVEMENT}?resumeId=${row.id}`)}
+            className="p-1.5 rounded text-accent-primary hover:bg-accent-primary/10 transition-colors flex items-center gap-1 text-xs font-medium"
+            title="Open in Improvement Studio"
+          >
+            <Sparkles size={14} /> Improve
+          </button>
+          <button
+            onClick={(e) => handleDelete(e, row.id)}
+            className="p-1.5 rounded text-text-muted hover:text-accent-negative hover:bg-accent-negative/10 transition-colors"
+            title="Delete resume"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
       ),
     },
   ];

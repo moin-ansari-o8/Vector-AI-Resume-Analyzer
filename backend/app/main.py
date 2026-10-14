@@ -1,5 +1,15 @@
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file (backend or root)
+load_dotenv()
+backend_env = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+if os.path.exists(backend_env):
+    load_dotenv(backend_env)
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.api.resume import router as resume_router
 from app.api.job import router as job_router
 from app.api.embedding import router as embedding_router

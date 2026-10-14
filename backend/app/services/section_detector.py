@@ -88,7 +88,7 @@ def detect_sections(text: str) -> dict:
         "certifications": ""
     }
 
-    current_section = None
+    current_section = "personal_information"
 
     lines = text.splitlines()
 

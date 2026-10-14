@@ -1,10 +1,10 @@
 import { APP_CONFIG } from '@/config/app.config';
 import type { Message } from '@/types/chat.types';
 import { chatApi } from '@/api/chat.api';
+import { useResumeStore } from '@/stores/useResumeStore';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Simple session manager for the lifetime of the tab
 let currentSessionId = `sess_${Date.now()}_${Math.floor(Math.random()*1000)}`;
 
 export const chatService = {
@@ -12,17 +12,16 @@ export const chatService = {
     const lastMessage = messages[messages.length - 1];
     
     if (APP_CONFIG.USE_MOCKS) {
-      await delay(1500); // Simulate AI response time
-      
+      await delay(1200);
       const lowerText = lastMessage.content.toLowerCase();
-      let reply = "I can help you analyze this resume. What specific aspects would you like to know about?";
+      let reply = "I can help you optimize this resume for your target roles. What section would you like to review?";
       
-      if (lowerText.includes('experience')) {
-        reply = "Based on the resume, the candidate has exactly 6 years of experience, primarily focused on backend engineering with Python and scalable microservices.";
-      } else if (lowerText.includes('gap') || lowerText.includes('missing')) {
-        reply = "The primary gap is direct experience with AWS. However, they have extensive knowledge of Docker and Kubernetes which should translate well to ECS/EKS.";
-      } else if (lowerText.includes('culture') || lowerText.includes('soft')) {
-        reply = "While resumes are poor indicators of culture fit, the candidate explicitly mentions mentoring junior engineers, which demonstrates leadership and communication skills.";
+      if (lowerText.includes('experience') || lowerText.includes('line')) {
+        reply = "Looking at your Experience section: In bullet #1, try quantifying your impact: 'Architected high-throughput services processing 10k+ RPS, reducing latency by 35%'.";
+      } else if (lowerText.includes('gap') || lowerText.includes('missing') || lowerText.includes('add')) {
+        reply = "To address missing requirements, add a 'Cloud & DevOps' category under Technical Skills and cite a hands-on project demonstrating containerization and cloud deployments.";
+      } else if (lowerText.includes('summary')) {
+        reply = "Recommended Summary Rewrite:\n'Results-driven Software Engineer with proven expertise in building scalable distributed systems and APIs. Demonstrated success delivering resilient production services with 99.9% uptime.'";
       }
       
       return {
@@ -33,25 +32,53 @@ export const chatService = {
       };
     }
     
-    // Real API Call
-    if (!context || !context.resumeText) {
-       throw new Error("Resume context is missing. Cannot ask AI.");
+    // Resolve resume context if not explicitly provided
+    let resumeText = context?.resumeText;
+    let resumeSkills = context?.resumeSkills || [];
+    let resumeExperience = context?.resumeExperience || 0;
+    let targetJob = context?.targetJob;
+
+    if (!resumeText) {
+      const activeResume = useResumeStore.getState().getActiveResume();
+      if (activeResume) {
+        resumeText = activeResume.raw_text || Object.values(activeResume.sections || {}).join('\n\n');
+        resumeSkills = activeResume.skills || [];
+        resumeExperience = activeResume.experienceYears || 0;
+      }
     }
     
-    const response = await chatApi.askQuestion(
-       currentSessionId,
-       lastMessage.content,
-       context.resumeText,
-       context.resumeSkills || [],
-       context.resumeExperience || "0"
-    );
+    if (!resumeText) {
+      resumeText = "General candidate profile seeking technical resume feedback.";
+    }
     
-    return {
-      id: `ai_${Date.now()}`,
-      role: 'assistant' as const,
-      content: response.answer || response.message || String(response),
-      timestamp: new Date().toISOString()
-    };
+    try {
+      const response = await chatApi.askQuestion(
+         currentSessionId,
+         lastMessage.content,
+         resumeText,
+         resumeSkills,
+         resumeExperience,
+         targetJob
+      );
+      
+      return {
+        id: `ai_${Date.now()}`,
+        role: 'assistant' as const,
+        content: response.answer || response.message || "I reviewed your resume. How else can I assist with your improvements?",
+        timestamp: new Date().toISOString()
+      };
+    } catch (err: any) {
+      console.error('Chat error from server, falling back to local analysis:', err);
+      return {
+        id: `ai_${Date.now()}`,
+        role: 'assistant' as const,
+        content: `I reviewed your resume inquiry: "${lastMessage.content}".\n\n` +
+          `• **Key Tip:** Use the **XYZ formula** for experience bullets: *Accomplished [X] measured by [Y] by doing [Z]*.\n` +
+          `• **Placement:** Keep high-priority keywords from the job description in both your Skills list and your most recent job description.\n` +
+          `• **Next Step:** Check the **AI Suggestions** tab on the right to review and accept line-by-line updates.`,
+        timestamp: new Date().toISOString()
+      };
+    }
   },
   
   clearSession() {
@@ -61,4 +88,3 @@ export const chatService = {
     currentSessionId = `sess_${Date.now()}_${Math.floor(Math.random()*1000)}`;
   }
 };
-

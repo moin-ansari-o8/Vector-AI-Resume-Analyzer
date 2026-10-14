@@ -1,39 +1,50 @@
+from typing import List, Optional
 from fastapi import APIRouter
 from pydantic import BaseModel
 
 from app.services.rag_service import (
     answer_career_question
 )
-
 from app.services.chat_memory import (
     add_message,
     get_history,
     clear_history
 )
-
+from app.services.llm_service import (
+    get_ai_status,
+    set_gemini_api_key
+)
 
 router = APIRouter(
     prefix="/chat",
     tags=["Career Assistant"]
 )
 
-
 class CareerChatRequest(BaseModel):
     session_id: str
     question: str
     resume_text: str
-    resume_skills: list[str]
-    resume_experience: float
+    resume_skills: Optional[List[str]] = []
+    resume_experience: Optional[float] = 0.0
+    target_job: Optional[str] = None
 
+class ConfigRequest(BaseModel):
+    gemini_api_key: str
+
+@router.get("/status")
+def chat_status():
+    return get_ai_status()
+
+@router.post("/config")
+def update_config(config: ConfigRequest):
+    set_gemini_api_key(config.gemini_api_key)
+    return {"message": "AI configuration updated successfully", "status": get_ai_status()}
 
 @router.post("/career")
 def career_chat(
     request: CareerChatRequest
 ):
-
-    history = get_history(
-        request.session_id
-    )
+    history = get_history(request.session_id)
 
     add_message(
         session_id=request.session_id,
@@ -41,11 +52,16 @@ def career_chat(
         content=request.question
     )
 
+    # If target_job provided, prepend to question context
+    effective_question = request.question
+    if request.target_job:
+        effective_question = f"[Target Role: {request.target_job}] {request.question}"
+
     answer = answer_career_question(
-        question=request.question,
+        question=effective_question,
         resume_text=request.resume_text,
-        resume_skills=request.resume_skills,
-        resume_experience=request.resume_experience,
+        resume_skills=request.resume_skills or [],
+        resume_experience=float(request.resume_experience or 0.0),
         history=history
     )
 
@@ -61,14 +77,11 @@ def career_chat(
         "answer": answer
     }
 
-
 @router.delete("/career/{session_id}")
 def delete_chat_history(
     session_id: str
 ):
-
     clear_history(session_id)
-
     return {
         "message": "Conversation history cleared.",
         "session_id": session_id

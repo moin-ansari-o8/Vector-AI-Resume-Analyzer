@@ -24,8 +24,9 @@ export function AppRouter() {
           <Route element={<DashboardLayout />}>
             <Route path={ROUTES.HOME} element={<DashboardPage />} />
             <Route path={ROUTES.RESUMES} element={<ResumesPage />} />
-            <Route path={ROUTES.RESUME_DETAIL(':id')} element={<ResumeDetailPage />} />
+            <Route path={ROUTES.RESUME_DETAIL(':id')} element={<ResumeImprovementPage />} />
             <Route path={ROUTES.JOBS} element={<JobsPage />} />
+
             <Route path={ROUTES.MATCH_RESULTS(':id')} element={<MatchResultsPage />} />
             <Route path={ROUTES.ANALYSIS} element={<AnalysisStudioPage />} />
             <Route path={ROUTES.IMPROVEMENT} element={<ResumeImprovementPage />} />

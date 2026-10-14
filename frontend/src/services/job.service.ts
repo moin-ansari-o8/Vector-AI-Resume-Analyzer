@@ -43,17 +43,30 @@ export const jobService = {
     return job;
   },
 
-  async create(data: Partial<Job>) {
+  async create(data: Partial<Job>): Promise<Job> {
     if (APP_CONFIG.USE_MOCKS) {
       await delay(800);
-      return { success: true };
+      const mockJob: Job = {
+        id: `job_mock_${Date.now()}`,
+        role: data.title || data.role || 'New Job',
+        title: data.title || data.role || 'New Job',
+        company: data.company || 'TechCorp',
+        requiredSkills: ['Python', 'Docker', 'AWS'],
+        experienceRequired: 2,
+        addedAt: new Date().toISOString(),
+        matchesCount: 0
+      };
+      const currentJobs = getSessionJobs();
+      saveSessionJobs([mockJob, ...currentJobs]);
+      return mockJob;
     }
     const result = await jobApi.create(data);
     
     // Add to session jobs
     const newJob: Job = {
       id: `job_real_${Date.now()}`,
-      role: data.title || 'New Job',
+      role: data.title || data.role || 'New Job',
+      title: data.title || data.role || 'New Job',
       company: data.company || 'Unknown',
       requiredSkills: result.required_skills || [],
       experienceRequired: result.experience_required || 0,

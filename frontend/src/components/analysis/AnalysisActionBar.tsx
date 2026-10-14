@@ -15,7 +15,7 @@ export function AnalysisActionBar({ resumeId }: AnalysisActionBarProps) {
       <Button 
         variant="primary" 
         icon={<PenTool size={16} />}
-        onClick={() => navigate(ROUTES.IMPROVEMENT)}
+        onClick={() => navigate(`${ROUTES.IMPROVEMENT}?resumeId=${resumeId}`)}
       >
         Improve Resume
       </Button>

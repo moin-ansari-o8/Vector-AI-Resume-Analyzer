@@ -4,3 +4,5 @@ export interface ChatMessage {
   content: string;
   timestamp: string;
 }
+
+export type Message = ChatMessage;

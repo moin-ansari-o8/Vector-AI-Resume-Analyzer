@@ -1,10 +1,11 @@
 import { apiClient } from './client';
+import { APP_CONFIG } from '@/config/app.config';
 import type { Resume } from '@/types/resume.types';
 
 export const resumeApi = {
-  // Local only - no backend GET
-  getAll: () => Promise.resolve([]),
-  getById: (id: string) => Promise.reject(new Error("Not implemented on backend")),
+  getAll: () => apiClient.get<Resume[]>('/resume/').then(res => res.data),
+  
+  getById: (id: string) => apiClient.get<Resume>(`/resume/${id}`).then(res => res.data),
   
   upload: (file: File) => {
     const formData = new FormData();
@@ -14,6 +15,14 @@ export const resumeApi = {
     }).then(res => res.data);
   },
   
-  // Local only
-  delete: (id: string) => Promise.resolve({ success: true }),
+  create: (data: Partial<Resume>) =>
+    apiClient.post<Resume>('/resume/', data).then(res => res.data),
+
+  update: (id: string, data: Partial<Resume>) =>
+    apiClient.put<Resume>(`/resume/${id}`, data).then(res => res.data),
+    
+  delete: (id: string) => apiClient.delete<any>(`/resume/${id}`).then(res => res.data),
+
+  getPdfUrl: (id: string) => `${APP_CONFIG.API_BASE_URL}/resume/${id}/pdf`,
 };
+
