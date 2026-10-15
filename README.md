@@ -1,6 +1,6 @@
 # VECTOR — AI Resume Intelligence & Analyzer
 
-An intelligent AI-powered resume analysis, job matching, and career recommendation system built with **FastAPI** on the backend and **React + TypeScript + Vite** on the frontend.
+An intelligent AI-powered resume analysis, job matching, and career recommendation system supporting **PDF, PNG, JPG, and JPEG** resumes. Built with **FastAPI** on the backend and **React + TypeScript + Vite** on the frontend.
 
 ---
 

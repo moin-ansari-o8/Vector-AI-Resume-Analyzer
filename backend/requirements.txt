@@ -12,3 +12,6 @@ httpx
 pydantic-settings
 ollama
 sentence-transformers
+easyocr>=1.7.0
+Pillow>=10.0.0
+python-dotenv>=1.0.0

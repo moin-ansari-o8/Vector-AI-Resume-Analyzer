@@ -9,13 +9,15 @@ export interface UploadZoneProps {
   className?: string;
 }
 
+const ALLOWED_EXTENSIONS = ['.pdf', '.png', '.jpg', '.jpeg'];
+
 /**
- * Sophisticated drag-and-drop upload zone for PDF resumes.
+ * Sophisticated drag-and-drop upload zone for resumes (PDF, PNG, JPG, JPEG).
  * NOT a generic dashed rectangle — styled to match our premium aesthetic.
  */
 export function UploadZone({
   onFileSelect,
-  accept = '.pdf',
+  accept = '.pdf,.png,.jpg,.jpeg',
   maxSizeMB = 10,
   className,
 }: UploadZoneProps) {
@@ -27,8 +29,12 @@ export function UploadZone({
     (file: File) => {
       setError(null);
 
-      if (!file.name.toLowerCase().endsWith('.pdf')) {
-        setError('Only PDF files are accepted.');
+      const isAllowed = ALLOWED_EXTENSIONS.some((ext) =>
+        file.name.toLowerCase().endsWith(ext)
+      );
+
+      if (!isAllowed) {
+        setError('Only PDF, PNG, JPG, and JPEG files are accepted.');
         return;
       }
 
@@ -123,7 +129,7 @@ export function UploadZone({
               {isDragging ? 'Drop resume here' : 'DROP RESUME HERE'}
             </p>
             <p className="text-xs text-text-muted mt-1">
-              PDF only · Max {maxSizeMB}MB ·{' '}
+              PDF, PNG, JPG · Max {maxSizeMB}MB ·{' '}
               <span className="text-accent-primary">Browse files</span>
             </p>
           </div>

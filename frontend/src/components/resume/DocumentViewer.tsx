@@ -105,7 +105,7 @@ export function DocumentViewer({
                   : "text-text-muted hover:text-text-primary"
               )}
             >
-              <FileText size={13} /> Original PDF
+              <FileText size={13} /> Original File
             </button>
             <button
               onClick={() => setViewMode('raw')}
@@ -126,7 +126,7 @@ export function DocumentViewer({
               target="_blank"
               rel="noreferrer"
               className="p-1.5 rounded text-text-muted hover:text-text-primary hover:bg-bg-hover transition-colors"
-              title="Open PDF in new tab"
+              title="Open document in new tab"
             >
               <ExternalLink size={16} />
             </a>

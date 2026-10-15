@@ -117,22 +117,24 @@ export const resumeService = {
   },
 
   async upload(file: File): Promise<{ message: string; resumeId: string }> {
+    const cleanFileName = file.name.replace(/\.(pdf|png|jpe?g)$/i, '');
+
     if (APP_CONFIG.USE_MOCKS) {
       await delay(800);
       const mockId = `res_mock_${Date.now()}`;
       const mockResume: Resume = {
         id: mockId,
         filename: file.name,
-        candidateName: file.name.replace('.pdf', '').replace(/[-_]/g, ' '),
+        candidateName: cleanFileName.replace(/[-_]/g, ' '),
         role: 'Software Engineer',
         experienceYears: 3,
         uploadedAt: new Date().toISOString(),
         uploaded_at: new Date().toISOString(),
         status: 'ready',
         skills: ['Python', 'FastAPI', 'Docker', 'PostgreSQL', 'AWS'],
-        raw_text: `Candidate Profile: ${file.name.replace('.pdf', '')}\nRole: Software Engineer\nExperience: 3+ years in full-stack and backend development.\nSkills: Python, FastAPI, Docker, PostgreSQL, AWS\n• Developed and deployed scalable microservices.\n• Collaborated across cross-functional teams to deliver production releases.`,
+        raw_text: `Candidate Profile: ${cleanFileName}\nRole: Software Engineer\nExperience: 3+ years in full-stack and backend development.\nSkills: Python, FastAPI, Docker, PostgreSQL, AWS\n• Developed and deployed scalable microservices.\n• Collaborated across cross-functional teams to deliver production releases.`,
         sections: {
-          personal_information: `${file.name.replace('.pdf', '')}\ncontact@example.com | San Francisco, CA`,
+          personal_information: `${cleanFileName}\ncontact@example.com | San Francisco, CA`,
           experience: `Software Engineer • TechCorp (2022 - Present)\n• Spearheaded core microservices development using Python and FastAPI.\n• Optimized database query pipelines reducing latency by 30%.\n• Managed containerized deployments using Docker and AWS.`,
           skills: 'Python, FastAPI, Docker, PostgreSQL, React, AWS',
           education: 'B.S. in Computer Science • University of Technology (2018 - 2022)'
@@ -153,8 +155,8 @@ export const resumeService = {
     const newResume: Resume = {
       id: data.id || `res_real_${Date.now()}`,
       filename: data.filename || file.name,
-      candidateName: data.candidateName || data.structured_data?.personal_information || file.name.replace('.pdf', ''),
-      candidate_name: data.candidateName || file.name.replace('.pdf', ''),
+      candidateName: data.candidateName || data.structured_data?.personal_information || cleanFileName,
+      candidate_name: data.candidateName || cleanFileName,
       role: data.role || 'Candidate',
       experienceYears: Number(data.experienceYears || data.structured_data?.experience_years || 0),
       experience_years: Number(data.experienceYears || 0),

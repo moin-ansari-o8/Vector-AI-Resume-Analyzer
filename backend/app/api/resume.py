@@ -8,6 +8,7 @@ from fastapi import APIRouter, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse
 
 from app.services.pdf_parser import extract_text_from_pdf
+from app.services.ocr_service import extract_text_from_image, convert_image_to_pdf
 from app.utils.text_cleaner import clean_resume_text
 from app.schemas.resume import (
     ResumeUploadResponse,
@@ -81,14 +82,18 @@ def _extract_role(sections: dict, text: str) -> str:
     return "Software Engineer"
 
 
+ALLOWED_EXTENSIONS = {".pdf", ".png", ".jpg", ".jpeg"}
+
+
 @router.post("/upload", response_model=ResumeUploadResponse)
 async def upload_resume(
     file: UploadFile = File(...)
 ):
-    if not file.filename.lower().endswith(".pdf"):
+    ext = os.path.splitext(file.filename.lower())[1]
+    if ext not in ALLOWED_EXTENSIONS:
         raise HTTPException(
             status_code=400,
-            detail="Only PDF files are allowed."
+            detail="Only PDF, PNG, JPG, and JPEG files are allowed."
         )
 
     os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
@@ -99,13 +104,24 @@ async def upload_resume(
         shutil.copyfileobj(file.file, buffer)
 
     try:
-        raw_text = extract_text_from_pdf(file_path)
+        if ext == ".pdf":
+            raw_text = extract_text_from_pdf(file_path)
+        else:
+            # Extract text from PNG/JPG/JPEG via OCR
+            raw_text = extract_text_from_image(file_path)
+            # Also generate a PDF version for the DocumentViewer preview
+            converted_pdf_path = os.path.splitext(file_path)[0] + ".pdf"
+            try:
+                convert_image_to_pdf(file_path, converted_pdf_path)
+            except Exception as conv_err:
+                print(f"Warning: Failed to convert image to PDF preview: {conv_err}")
+
         cleaned_text = clean_resume_text(raw_text)
 
         if not cleaned_text:
             raise HTTPException(
                 status_code=400,
-                detail="No readable text found in the PDF."
+                detail="No readable text found in the document. Please ensure the resume is clear and legible."
             )
 
         sections = detect_sections(cleaned_text)
@@ -206,12 +222,30 @@ def get_resume_pdf(resume_id: str):
     if not file_path or not os.path.exists(file_path):
         raise HTTPException(
             status_code=404,
-            detail="PDF file not found on server"
+            detail="Document file not found on server"
         )
+
+    # Check if a converted PDF preview exists for image uploads
+    converted_pdf = os.path.splitext(file_path)[0] + ".pdf"
+    if os.path.exists(converted_pdf):
+        return FileResponse(
+            path=converted_pdf,
+            media_type="application/pdf",
+            filename=f"{os.path.splitext(resume.get('filename', 'resume'))[0]}.pdf"
+        )
+
+    lower_path = file_path.lower()
+    if lower_path.endswith(".png"):
+        media_type = "image/png"
+    elif lower_path.endswith((".jpg", ".jpeg")):
+        media_type = "image/jpeg"
+    else:
+        media_type = "application/pdf"
+
     return FileResponse(
         path=file_path,
-        media_type="application/pdf",
-        filename=resume.get("filename", "resume.pdf")
+        media_type=media_type,
+        filename=resume.get("filename", "resume")
     )
 
 

@@ -146,6 +146,13 @@ def delete_resume(resume_id: str) -> bool:
             os.remove(row["file_path"])
         except Exception:
             pass
+        # Also clean up converted PDF preview if one was generated
+        converted_pdf = os.path.splitext(row["file_path"])[0] + ".pdf"
+        if os.path.exists(converted_pdf) and converted_pdf != row["file_path"]:
+            try:
+                os.remove(converted_pdf)
+            except Exception:
+                pass
             
     cursor.execute("DELETE FROM resumes WHERE id = ?", (resume_id,))
     deleted = cursor.rowcount > 0
