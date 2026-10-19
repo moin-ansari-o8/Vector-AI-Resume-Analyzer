@@ -40,7 +40,7 @@ export function MatchResultsPage() {
           <div className="w-8 h-8 rounded-full bg-bg-hover flex items-center justify-center shrink-0">
             <User size={16} className="text-text-muted" />
           </div>
-          <span className="font-medium text-text-primary">{row.candidateId}</span>
+          <span className="font-medium text-text-primary">{row.candidateName || row.candidateId}</span>
         </div>
       ),
     },

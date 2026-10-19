@@ -22,6 +22,8 @@ from app.api.resume_improvement import (router as resume_improvement_router)
 from app.api.explainability import (router as explainability_router)
 from app.api.ingestion import (router as ingestion_router)
 
+from app.db.database import init_db
+
 app = FastAPI(
     title="AI Resume Analyzer",
     description=(
@@ -30,6 +32,10 @@ app = FastAPI(
     ),
     version="1.0.0"
 )
+
+@app.on_event("startup")
+def on_startup():
+    init_db()
 
 app.add_middleware(
     CORSMiddleware,

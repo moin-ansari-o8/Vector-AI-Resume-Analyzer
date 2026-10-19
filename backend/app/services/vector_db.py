@@ -1,8 +1,11 @@
+import os
 import chromadb
 
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+VECTOR_DB_PATH = os.path.join(PROJECT_ROOT, "vector_db")
 
 client = chromadb.PersistentClient(
-    path="../vector_db"
+    path=VECTOR_DB_PATH
 )
 
 collection = client.get_or_create_collection(
@@ -19,13 +22,22 @@ def add_job(
     """
     Store a job and its embedding.
     """
-
     collection.upsert(
         ids=[job_id],
         documents=[job_text],
         embeddings=[embedding],
         metadatas=[metadata]
     )
+
+
+def delete_job(job_id: str):
+    """
+    Delete a job from ChromaDB by ID.
+    """
+    try:
+        collection.delete(ids=[job_id])
+    except Exception as e:
+        print(f"Warning: Failed to delete job {job_id} from ChromaDB: {e}")
 
 
 def search_jobs(
@@ -36,7 +48,6 @@ def search_jobs(
     Search for jobs that are semantically
     similar to the supplied embedding.
     """
-
     total_jobs = collection.count()
 
     if total_jobs == 0:

@@ -2,21 +2,22 @@ import { apiClient } from './client';
 import type { Job } from '@/types/job.types';
 
 export const jobApi = {
-  // Local only
-  getAll: () => Promise.resolve([]),
-  getById: (id: string) => Promise.reject(new Error("Not implemented on backend")),
-  
+  getAll: () => apiClient.get<Job[]>('/jobs/').then(res => res.data),
+
+  getById: (id: string) => apiClient.get<Job>(`/jobs/${id}`).then(res => res.data),
+
   create: (data: Partial<Job>) => {
-    // According to backend spec: { title, company, location, description }
     const payload = {
-      title: data.role || (data as any).title || '',
+      title: data.title || data.role || '',
+      role: data.role || data.title || '',
       company: data.company || '',
-      location: (data as any).location || '',
-      description: (data as any).description || ''
+      location: data.location || 'Remote',
+      description: data.description || '',
+      required_skills: data.requiredSkills,
+      experience_required: data.experienceRequired
     };
-    return apiClient.post<any>('/jobs/process', payload).then(res => res.data);
+    return apiClient.post<Job>('/jobs/', payload).then(res => res.data);
   },
-  
-  // Local only
-  delete: (id: string) => Promise.resolve({ success: true }),
+
+  delete: (id: string) => apiClient.delete<{ message: string; id: string }>(`/jobs/${id}`).then(res => res.data),
 };

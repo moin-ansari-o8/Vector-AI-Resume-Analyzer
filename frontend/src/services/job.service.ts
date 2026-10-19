@@ -5,7 +5,7 @@ import type { Job } from '@/types/job.types';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-const getSessionJobs = (): Job[] => {
+const getLocalJobs = (): Job[] => {
   const saved = localStorage.getItem('sessionJobs');
   if (saved) {
     try {
@@ -17,29 +17,52 @@ const getSessionJobs = (): Job[] => {
   return [];
 };
 
-const saveSessionJobs = (jobs: Job[]) => {
-  localStorage.setItem('sessionJobs', JSON.stringify(jobs));
+const saveLocalJobs = (jobs: Job[]) => {
+  try {
+    localStorage.setItem('sessionJobs', JSON.stringify(jobs));
+  } catch (e) {
+    console.error('Failed to save jobs to cache:', e);
+  }
 };
 
 export const jobService = {
-  async getAll() {
+  async getAll(): Promise<Job[]> {
     if (APP_CONFIG.USE_MOCKS) {
       await delay(500);
       return mockJobs;
     }
-    return getSessionJobs();
+
+    try {
+      const serverJobs = await jobApi.getAll();
+      if (serverJobs && serverJobs.length > 0) {
+        saveLocalJobs(serverJobs);
+        return serverJobs;
+      }
+    } catch (e) {
+      console.warn('Backend jobs fetch failed, falling back to local cache:', e);
+    }
+
+    return getLocalJobs();
   },
 
-  async getById(id: string) {
+  async getById(id: string): Promise<Job> {
     if (APP_CONFIG.USE_MOCKS) {
       await delay(300);
       const job = mockJobs.find(j => j.id === id);
       if (!job) throw new Error('Job not found');
       return job;
     }
-    const jobs = getSessionJobs();
-    const job = jobs.find(j => j.id === id);
-    if (!job) throw new Error('Job not found in session');
+
+    try {
+      const serverJob = await jobApi.getById(id);
+      if (serverJob) return serverJob;
+    } catch (e) {
+      console.warn('Backend getById failed, checking local cache for job:', id, e);
+    }
+
+    const localJobs = getLocalJobs();
+    const job = localJobs.find(j => j.id === id);
+    if (!job) throw new Error('Job not found');
     return job;
   },
 
@@ -56,36 +79,31 @@ export const jobService = {
         addedAt: new Date().toISOString(),
         matchesCount: 0
       };
-      const currentJobs = getSessionJobs();
-      saveSessionJobs([mockJob, ...currentJobs]);
+      const currentJobs = getLocalJobs();
+      saveLocalJobs([mockJob, ...currentJobs]);
       return mockJob;
     }
-    const result = await jobApi.create(data);
-    
-    // Add to session jobs
-    const newJob: Job = {
-      id: `job_real_${Date.now()}`,
-      role: data.title || data.role || 'New Job',
-      title: data.title || data.role || 'New Job',
-      company: data.company || 'Unknown',
-      requiredSkills: result.required_skills || [],
-      experienceRequired: result.experience_required || 0,
-      addedAt: new Date().toISOString(),
-      matchesCount: 0
-    };
-    
-    const currentJobs = getSessionJobs();
-    saveSessionJobs([newJob, ...currentJobs]);
-    return newJob;
+
+    const savedJob = await jobApi.create(data);
+    const currentJobs = getLocalJobs();
+    saveLocalJobs([savedJob, ...currentJobs.filter(j => j.id !== savedJob.id)]);
+    return savedJob;
   },
 
-  async delete(id: string) {
+  async delete(id: string): Promise<{ success: boolean }> {
     if (APP_CONFIG.USE_MOCKS) {
       await delay(400);
       return { success: true };
     }
-    const currentJobs = getSessionJobs();
-    saveSessionJobs(currentJobs.filter(j => j.id !== id));
+
+    try {
+      await jobApi.delete(id);
+    } catch (e) {
+      console.warn('Backend delete job failed:', e);
+    }
+
+    const currentJobs = getLocalJobs();
+    saveLocalJobs(currentJobs.filter(j => j.id !== id));
     return { success: true };
   }
 };

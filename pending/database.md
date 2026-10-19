@@ -1,57 +1,82 @@
-Listed directory backend
-Listed directory app
-Viewed requirements.txt:1-14
-Listed directory models
-Viewed chat.py
-Listed directory api
-Viewed job.py:1-34
-Viewed resume.py:1-150
-Viewed vector.py:1-84
-Viewed vector_db.py:1-55
-Viewed resume.service.ts:1-82
-Viewed job.service.ts:1-79
-Listed directory AI-Resume-Analyzer
-Listed directory data
-Listed directory jobs
-Listed directory resumes
+# Database Implementation Report: COMPLETED ✅
 
-**Yes, that is completely true.**
+## Summary of Completed Implementation
 
-Currently, the project is **not** maintaining a proper database for storing resumes, job descriptions, candidates, or match history.
-
-Here is the exact breakdown of how data is currently handled and why this is happening:
+The FastAPI backend and React frontend have been upgraded from transient/localStorage storage to a **fully database-driven architecture** using SQLite and ChromaDB.
 
 ---
 
-### 1. Current Backend State (Stateless & Transient)
+### 1. SQLite Database Schema (`backend/data/resumes.db`)
 
-* **No Relational Database Setup**: [`SQLAlchemy`](file:///o:/ME/VIT/projects/python_fds/AI-Resume-Analyzer/backend/requirements.txt#L9) is listed in `requirements.txt`, and [`backend/app/models/`](file:///o:/ME/VIT/projects/python_fds/AI-Resume-Analyzer/backend/app/models/) exists, but [`chat.py`](file:///o:/ME/VIT/projects/python_fds/AI-Resume-Analyzer/backend/app/models/chat.py) is 0 bytes. There are **no SQL tables, database connections, or ORM models**.
-* **Stateless Endpoints**:
-  * [`POST /resume/upload`](file:///o:/ME/VIT/projects/python_fds/AI-Resume-Analyzer/backend/app/api/resume.py#L35): Saves the raw PDF file to `backend/uploads/` on disk, parses skills/experience in memory, and immediately returns the JSON response. **It does not record the parsed resume or candidate in any database.**
-  * [`POST /jobs/process`](file:///o:/ME/VIT/projects/python_fds/AI-Resume-Analyzer/backend/app/api/job.py#L19): Parses the job text in memory and returns extracted skills, but **never persists the job record**.
-  * [`POST /matching/match`](file:///o:/ME/VIT/projects/python_fds/AI-Resume-Analyzer/backend/app/api/matching.py): Computes the match score in real time, but **does not save match history or audit logs**.
-* **ChromaDB is only for Vector Search**: [`ChromaDB`](file:///o:/ME/VIT/projects/python_fds/AI-Resume-Analyzer/backend/app/services/vector_db.py) is used strictly as a vector index for semantic similarity search, not as an application database. Resumes are not even added to it.
+All core entities are backed by persistent relational tables created on startup via `init_db()`:
+
+1. **`resumes`**:
+   - `id` (TEXT PRIMARY KEY)
+   - `filename`, `candidate_name`, `role`, `experience_years`, `status`
+   - `skills` (JSON TEXT), `raw_text`, `sections` (JSON TEXT), `structured_data` (JSON TEXT)
+   - `file_path`, `uploaded_at`
+
+2. **`jobs`**:
+   - `id` (TEXT PRIMARY KEY)
+   - `title`, `role`, `company`, `location`, `description`
+   - `required_skills` (JSON TEXT), `experience_required` (REAL)
+   - `matches_count` (INTEGER), `added_at`
+   - **Auto-seeded** with 5 initial default jobs from `data/jobs/jobs.json` when the table is initialized.
+
+3. **`matches`**:
+   - `id` (TEXT PRIMARY KEY)
+   - `candidate_id`, `candidate_name`
+   - `job_id`, `job_title`
+   - `score` (INTEGER)
+   - `matched_skills` (JSON TEXT), `missing_skills` (JSON TEXT)
+   - `timestamp`
+
+4. **`settings`**:
+   - `key` (TEXT PRIMARY KEY), `value` (TEXT)
 
 ---
 
-### 2. What the Frontend is Doing as a Temporary Band-Aid
+### 2. Backend API Endpoints Implemented
 
-Because the backend lacks `GET /resumes`, `GET /jobs`, and `GET /matches` persistence endpoints:
-
-* The frontend services ([`resume.service.ts`](file:///o:/ME/VIT/projects/python_fds/AI-Resume-Analyzer/frontend/src/services/resume.service.ts#L10-L24) and [`job.service.ts`](file:///o:/ME/VIT/projects/python_fds/AI-Resume-Analyzer/frontend/src/services/job.service.ts#L8-L22)) are currently falling back to browser **`localStorage`** (`sessionResumes` and `sessionJobs`).
-* If you open Incognito, use a different browser, or clear your browser cache, all uploaded resumes, created jobs, and dashboard metrics disappear.
+| Endpoint | Method | Description |
+| :--- | :--- | :--- |
+| `/resume/upload` | `POST` | Parses PDF, PNG, JPG, or JPEG resumes via OCR/PyMuPDF, extracts skills & experience, saves to SQLite |
+| `/resume/` | `GET` | Retrieves all resumes from SQLite |
+| `/resume/{id}` | `GET` | Retrieves a single resume by ID from SQLite |
+| `/resume/{id}` | `PUT` | Updates candidate name, role, raw text, or skills in SQLite |
+| `/resume/{id}` | `DELETE` | Deletes resume from SQLite and cleans up uploaded files & preview PDFs from disk |
+| `/resume/{id}/pdf` | `GET` | Streams PDF document (or image converted to PDF on the fly) |
+| `/jobs/` | `GET` | Lists all jobs from SQLite |
+| `/jobs/{id}` | `GET` | Retrieves a single job by ID from SQLite |
+| `/jobs/` | `POST` | Auto-extracts required skills & experience, saves to SQLite, and indexes in ChromaDB |
+| `/jobs/{id}` | `DELETE` | Deletes job from SQLite and ChromaDB |
+| `/jobs/process` | `POST` | In-memory extraction of skills & experience |
+| `/matching/recent` | `GET` | Retrieves recent match audit history from SQLite |
+| `/matching/record` | `POST` | Records candidate-job match result and increments `matches_count` |
+| `/matching/job/{job_id}` | `GET` | Evaluates and ranks candidates in SQLite against job requirements |
+| `/matching/resume-jobs` | `POST` | Vector semantic similarity matching against ChromaDB |
 
 ---
 
-### 3. What a Proper Database Implementation Needs
+### 3. Frontend Integration
 
-To make this a production-grade system with true persistence:
+All frontend API clients and services have been updated to connect directly to the real SQLite backend:
 
-| Layer | Component | What Needs to be Implemented |
-| --- | --- | --- |
-| **Database** | SQLite (for zero-config local dev) or PostgreSQL | `database.py` with SQLAlchemy engine, `SessionLocal`, and DB dependency |
-| **Models** | `Resume`, `Job`, `MatchResult` | Tables storing metadata, parsed entities, skills JSON, scores, and timestamps |
-| **Backend API** | CRUD Endpoints | `GET /resumes`, `DELETE /resumes/{id}`<br>`GET /jobs`, `DELETE /jobs/{id}`<br>`GET /matches/history` |
-| **Frontend** | API Client | Update `resume.service.ts` and `job.service.ts` to fetch from the backend DB instead of `localStorage` |
+- [`frontend/src/api/job.api.ts`](file:///o:/ME/VIT/projects/python_fds/AI-Resume-Analyzer/frontend/src/api/job.api.ts) & [`frontend/src/services/job.service.ts`](file:///o:/ME/VIT/projects/python_fds/AI-Resume-Analyzer/frontend/src/services/job.service.ts):
+  - Fetches jobs from `GET /jobs/`
+  - Saves new jobs to `POST /jobs/`
+  - Deletes jobs from `DELETE /jobs/{id}`
+  - Offline/fallback local cache maintained seamlessly
 
-Would you like to implement a proper SQLite + SQLAlchemy database in the FastAPI backend and connect the frontend to it now?
+- [`frontend/src/api/matching.api.ts`](file:///o:/ME/VIT/projects/python_fds/AI-Resume-Analyzer/frontend/src/api/matching.api.ts) & [`frontend/src/services/matching.service.ts`](file:///o:/ME/VIT/projects/python_fds/AI-Resume-Analyzer/frontend/src/services/matching.service.ts):
+  - Fetches recent match history from `GET /matching/recent`
+  - Records match results directly to `POST /matching/record`
+  - Evaluates candidates for a job via `GET /matching/job/{job_id}`
+
+---
+
+### 4. Verification & Testing Results
+
+- **Database Unit & API Tests:** 100% Passed (`test_db_persistence.py`)
+- **End-to-End Suite:** All 17 tests passed (`test_all_endpoints.py`)
+- **Frontend TypeScript Build:** `npm run build` compiled cleanly with 0 errors.

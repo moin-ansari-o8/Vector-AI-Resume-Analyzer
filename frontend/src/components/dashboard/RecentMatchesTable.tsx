@@ -24,13 +24,13 @@ export function RecentMatchesTable() {
       key: 'candidate',
       header: 'Candidate',
       render: (row) => (
-        <span className="font-medium">{row.candidateId}</span>
+        <span className="font-medium">{row.candidateName || row.candidateId}</span>
       ),
     },
     {
       key: 'job',
       header: 'Job Title',
-      render: (row) => <span className="text-text-secondary">{row.jobId}</span>,
+      render: (row) => <span className="text-text-secondary">{row.jobTitle || row.jobId}</span>,
     },
     {
       key: 'timestamp',

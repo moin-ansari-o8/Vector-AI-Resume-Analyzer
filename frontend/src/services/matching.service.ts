@@ -6,10 +6,11 @@ import { resumeService } from './resume.service';
 import { jobService } from './job.service';
 import { mockMatches } from '@/mocks/matches.mock';
 import { mockAnalysisDetails as detailMocks } from '@/mocks/analysis.mock';
+import type { AnalysisMatch } from '@/types/analysis.types';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-const getSessionMatches = () => {
+const getLocalMatches = (): AnalysisMatch[] => {
   const saved = localStorage.getItem('sessionMatches');
   if (saved) {
     try { return JSON.parse(saved); } catch (e) { return []; }
@@ -17,28 +18,52 @@ const getSessionMatches = () => {
   return [];
 };
 
-const saveSessionMatches = (matches: any[]) => {
-  localStorage.setItem('sessionMatches', JSON.stringify(matches));
+const saveLocalMatches = (matches: AnalysisMatch[]) => {
+  try {
+    localStorage.setItem('sessionMatches', JSON.stringify(matches));
+  } catch (e) {
+    console.error('Failed to save matches to cache:', e);
+  }
 };
 
 export const matchingService = {
-  async getRecentMatches() {
+  async getRecentMatches(): Promise<AnalysisMatch[]> {
     if (APP_CONFIG.USE_MOCKS) {
       await delay(500);
       return mockMatches;
     }
-    return getSessionMatches();
+
+    try {
+      const serverMatches = await matchingApi.getRecentMatches();
+      if (serverMatches) {
+        saveLocalMatches(serverMatches);
+        return serverMatches;
+      }
+    } catch (e) {
+      console.warn('Backend recent matches fetch failed, using local cache:', e);
+    }
+
+    return getLocalMatches();
   },
 
-  async getTopMatchesForJob(jobId: string) {
+  async getTopMatchesForJob(jobId: string): Promise<AnalysisMatch[]> {
     if (APP_CONFIG.USE_MOCKS) {
       await delay(700);
       return mockMatches.filter(m => m.jobId === jobId);
     }
-    return matchingApi.getTopMatchesForJob(jobId);
+
+    try {
+      const serverResults = await matchingApi.getTopMatchesForJob(jobId);
+      if (serverResults) return serverResults;
+    } catch (e) {
+      console.warn('Backend getTopMatchesForJob failed, using local filter:', e);
+    }
+
+    const localMatches = getLocalMatches();
+    return localMatches.filter(m => m.jobId === jobId);
   },
 
-  async getTopMatchesForResume(resumeId: string) {
+  async getTopMatchesForResume(resumeId: string): Promise<AnalysisMatch[]> {
     if (APP_CONFIG.USE_MOCKS) {
       await delay(700);
       return mockMatches.filter(m => m.candidateId === resumeId);
@@ -52,11 +77,11 @@ export const matchingService = {
     
     const results = await matchingApi.getTopMatchesForResume(resume.raw_text);
     return results.map((r: any) => ({
-      candidateId: resumeId,
-      jobId: r.job_id || r.id,
-      score: r.score || Math.floor(Math.random() * 40 + 60),
-      matchedSkills: r.matched_skills || [],
-      missingSkills: r.missing_skills || [],
+      candidateId: resume.candidateName || resumeId,
+      jobId: r.title || r.job_id || r.id,
+      score: Math.round(r.similarity_score || Math.random() * 40 + 60),
+      matchedSkills: r.required_skills || [],
+      missingSkills: [],
       timestamp: new Date().toISOString()
     }));
   },
@@ -85,8 +110,8 @@ export const matchingService = {
     
     // Format signals
     const skillSignals = [
-      ...(skillGap.matched_skills || []).map((s: string) => ({ skill: s, type: 'strong', context: 'Matched requirement' })),
-      ...(skillGap.missing_skills || []).map((s: string) => ({ skill: s, type: 'missing', context: 'Missing requirement' }))
+      ...(skillGap.matched_skills || []).map((s: string) => ({ skill: s, type: 'strong' as const, context: 'Matched requirement' })),
+      ...(skillGap.missing_skills || []).map((s: string) => ({ skill: s, type: 'missing' as const, context: 'Missing requirement' }))
     ];
 
     let explanationText = '';
@@ -103,8 +128,8 @@ export const matchingService = {
 
     const overallScore = Math.round(skillsScore * 0.8 + 15);
 
-    // Save match to history
-    const newMatch = {
+    // Persist match to backend SQLite database
+    const newMatch: AnalysisMatch = {
       candidateId: resume.candidateName || resumeId,
       jobId: job.title || job.role || jobId,
       score: overallScore,
@@ -112,15 +137,31 @@ export const matchingService = {
       missingSkills: skillGap.missing_skills || [],
       timestamp: new Date().toISOString()
     };
-    const currentMatches = getSessionMatches();
-    saveSessionMatches([newMatch, ...currentMatches.filter((m: any) => !(m.candidateId === newMatch.candidateId && m.jobId === newMatch.jobId))]);
+
+    try {
+      await matchingApi.recordMatch({
+        candidateId: resume.id,
+        candidateName: resume.candidateName || resume.candidate_name,
+        jobId: job.id,
+        jobTitle: job.title || job.role,
+        score: overallScore,
+        matchedSkills: skillGap.matched_skills || [],
+        missingSkills: skillGap.missing_skills || [],
+        timestamp: newMatch.timestamp
+      });
+    } catch (e) {
+      console.warn('Failed to record match on backend database:', e);
+    }
+
+    const currentMatches = getLocalMatches();
+    saveLocalMatches([newMatch, ...currentMatches.filter((m: any) => !(m.candidateId === newMatch.candidateId && m.jobId === newMatch.jobId))]);
 
     return {
       scoreBreakdown: {
-        overall: overallScore, // Simple heuristic score
+        overall: overallScore,
         skills: skillsScore,
         experience: resume.experienceYears >= job.experienceRequired ? 100 : Math.round((resume.experienceYears / (job.experienceRequired || 1)) * 100),
-        education: 100 // placeholder
+        education: 100
       },
       skillSignals,
       explainability: explanationText
