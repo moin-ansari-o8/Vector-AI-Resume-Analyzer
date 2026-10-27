@@ -72,10 +72,11 @@ export const chatService = {
       return {
         id: `ai_${Date.now()}`,
         role: 'assistant' as const,
-        content: `I reviewed your resume inquiry: "${lastMessage.content}".\n\n` +
-          `• **Key Tip:** Use the **XYZ formula** for experience bullets: *Accomplished [X] measured by [Y] by doing [Z]*.\n` +
-          `• **Placement:** Keep high-priority keywords from the job description in both your Skills list and your most recent job description.\n` +
-          `• **Next Step:** Check the **AI Suggestions** tab on the right to review and accept line-by-line updates.`,
+        content: `I'm having trouble connecting to the AI service right now.\n\n` +
+          `In the meantime, you can:\n` +
+          `• Click **✨ Show Suggestions** on the Improvement page for AI-powered suggestions\n` +
+          `• Try again in a moment — the AI service may be temporarily busy\n` +
+          `• Check the **Settings** page to verify your Gemini API key is configured`,
         timestamp: new Date().toISOString()
       };
     }

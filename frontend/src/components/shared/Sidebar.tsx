@@ -6,7 +6,6 @@ import {
   Briefcase,
   FlaskConical,
   Sparkles,
-  Activity,
   Settings,
   PanelLeftClose,
   PanelLeft,
@@ -33,7 +32,6 @@ const PRIMARY_NAV: NavItem[] = [
 ];
 
 const SECONDARY_NAV: NavItem[] = [
-  { label: 'Activity', path: '#activity', icon: Activity },
   { label: 'Settings', path: ROUTES.SETTINGS, icon: Settings },
 ];
 

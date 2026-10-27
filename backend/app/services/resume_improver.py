@@ -12,7 +12,7 @@ def generate_resume_improvements(
     missing_skills: list[str],
     sections: Optional[Dict[str, str]] = None
 ) -> Dict[str, Any]:
-    # Generate structured suggestions for the UI cards
+    # Generate structured suggestions for the UI
     structured = generate_structured_suggestions(
         resume_text=resume_text,
         job_title=job_title,
@@ -22,33 +22,19 @@ def generate_resume_improvements(
         sections=sections
     )
 
-    # Context for overview answer
-    context = f"""
-CANDIDATE RESUME:
-{resume_text[:2000]}
-
-CANDIDATE SKILLS:
-{", ".join(candidate_skills)}
-
-TARGET JOB:
-{job_title}
-
-JOB DESCRIPTION:
-{job_description}
-
-MISSING SKILLS:
-{", ".join(missing_skills)}
-"""
-
-    question = f"""
-Analyze this resume against the target role: {job_title}.
-Provide concise overview guidance on key ATS improvements and how to position the missing skills ({", ".join(missing_skills[:5])}).
-"""
-
-    summary_guidance = generate_answer(
-        question=question,
-        context=context
-    )
+    # Provide clear summary guidance based on candidate role and suggestions
+    is_student = "student" in resume_text.lower() or "undergrad" in resume_text.lower()
+    if is_student:
+        summary_guidance = (
+            f"As a student targeting {job_title}, focus on highlighting practical projects, "
+            f"computational depth, and algorithmic problem-solving. Review the {len(structured)} "
+            f"targeted suggestions below to enhance your bullet points with measurable impact."
+        )
+    else:
+        summary_guidance = (
+            f"Targeting {job_title}: Align your technical achievements with quantifiable scale, "
+            f"strong action verbs, and clear ATS keyword positioning across your projects and experience."
+        )
 
     return {
         "job_title": job_title,

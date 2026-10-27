@@ -5,7 +5,7 @@ from uuid import uuid4
 from typing import List, Optional
 
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 
 from app.services.pdf_parser import extract_text_from_pdf
 from app.services.ocr_service import extract_text_from_image, convert_image_to_pdf
@@ -228,24 +228,28 @@ def get_resume_pdf(resume_id: str):
     # Check if a converted PDF preview exists for image uploads
     converted_pdf = os.path.splitext(file_path)[0] + ".pdf"
     if os.path.exists(converted_pdf):
-        return FileResponse(
-            path=converted_pdf,
-            media_type="application/pdf",
-            filename=f"{os.path.splitext(resume.get('filename', 'resume'))[0]}.pdf"
-        )
-
-    lower_path = file_path.lower()
-    if lower_path.endswith(".png"):
-        media_type = "image/png"
-    elif lower_path.endswith((".jpg", ".jpeg")):
-        media_type = "image/jpeg"
-    else:
+        serve_path = converted_pdf
         media_type = "application/pdf"
+    else:
+        serve_path = file_path
+        lower_path = file_path.lower()
+        if lower_path.endswith(".png"):
+            media_type = "image/png"
+        elif lower_path.endswith((".jpg", ".jpeg")):
+            media_type = "image/jpeg"
+        else:
+            media_type = "application/pdf"
 
-    return FileResponse(
-        path=file_path,
+    # Serve inline (NOT as attachment) so iframe/embed doesn't trigger save dialog
+    with open(serve_path, "rb") as f:
+        content = f.read()
+    fname = resume.get("filename", "resume")
+    return Response(
+        content=content,
         media_type=media_type,
-        filename=resume.get("filename", "resume")
+        headers={
+            "Content-Disposition": f'inline; filename="{fname}"',
+        },
     )
 
 

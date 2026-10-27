@@ -6,9 +6,10 @@ import type { Job } from '@/types/job.types';
 
 interface JobTableProps {
   jobs: Job[];
+  emptyMessage?: string;
 }
 
-export function JobTable({ jobs }: JobTableProps) {
+export function JobTable({ jobs, emptyMessage }: JobTableProps) {
   const navigate = useNavigate();
 
   const columns: Column<Job>[] = [
@@ -67,6 +68,7 @@ export function JobTable({ jobs }: JobTableProps) {
       <DataTable
         columns={columns}
         data={jobs}
+        emptyMessage={emptyMessage}
         onRowClick={(row) => navigate(ROUTES.MATCH_RESULTS(row.id))}
       />
     </div>

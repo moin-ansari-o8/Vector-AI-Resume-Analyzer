@@ -317,6 +317,53 @@ def save_job(job_data: Dict[str, Any]) -> Dict[str, Any]:
     return get_job_by_id(job_id)
 
 
+def save_jobs_batch(jobs_list: List[Dict[str, Any]]) -> int:
+    """
+    High-speed batch insertion of jobs into SQLite using executemany.
+    """
+    if not jobs_list:
+        return 0
+    init_db()
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    rows_to_insert = []
+    now_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+    for j in jobs_list:
+        job_id = j.get("id") or j.get("job_id") or f"job_{int(time.time() * 1000)}"
+        title = j.get("title") or j.get("role") or "New Position"
+        role = j.get("role") or title
+        company = j.get("company") or "Industry Leader"
+        location = j.get("location") or "Remote / Hybrid"
+        description = j.get("description") or ""
+
+        skills = j.get("required_skills") or j.get("requiredSkills") or []
+        if isinstance(skills, str):
+            skills = [s.strip() for s in skills.split(",") if s.strip()]
+
+        skills_json = json.dumps(skills)
+        exp_req = float(j.get("experience_required") or j.get("experienceRequired") or 0.0)
+        matches_count = int(j.get("matches_count") or j.get("matchesCount") or 0)
+        added_at = j.get("added_at") or j.get("addedAt") or now_iso
+
+        rows_to_insert.append((
+            job_id, title, role, company, location, description,
+            skills_json, exp_req, matches_count, added_at
+        ))
+
+    cursor.executemany("""
+    INSERT OR REPLACE INTO jobs (
+        id, title, role, company, location, description,
+        required_skills, experience_required, matches_count, added_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, rows_to_insert)
+
+    conn.commit()
+    conn.close()
+    return len(rows_to_insert)
+
+
 def get_all_jobs() -> List[Dict[str, Any]]:
     init_db()
     conn = get_connection()

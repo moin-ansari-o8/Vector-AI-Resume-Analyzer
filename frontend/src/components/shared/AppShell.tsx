@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useLocation } from 'react-router';
 import { Sidebar } from '@/components/shared/Sidebar';
 import { TopBar } from '@/components/shared/TopBar';
 import { MobileNav } from '@/components/shared/MobileNav';
@@ -21,6 +22,7 @@ export interface AppShellProps {
  *   Mobile (<768px)    → No sidebar, bottom nav bar
  */
 export function AppShell({ children, className }: AppShellProps) {
+  const location = useLocation();
   const breakpoint = useBreakpoint();
   const setSidebarCollapsed = useAppStore((s) => s.setSidebarCollapsed);
 
@@ -34,6 +36,9 @@ export function AppShell({ children, className }: AppShellProps) {
   }, [breakpoint, setSidebarCollapsed]);
 
   const isMobile = breakpoint === 'mobile';
+  const isImprovementPage =
+    location.pathname.startsWith('/improvement') ||
+    location.pathname.startsWith('/resumes/');
 
   return (
     <div className={cn('flex h-screen w-full overflow-hidden bg-bg-primary', className)}>
@@ -56,8 +61,8 @@ export function AppShell({ children, className }: AppShellProps) {
       {/* Mobile bottom nav */}
       {isMobile && <MobileNav />}
 
-      {/* Global floating AI chat */}
-      <AIChat />
+      {/* Global floating AI chat - hidden on improvement page since it has its own dedicated workspace chat */}
+      {!isImprovementPage && <AIChat />}
     </div>
   );
 }

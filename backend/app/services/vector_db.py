@@ -20,13 +20,32 @@ def add_job(
     metadata: dict
 ):
     """
-    Store a job and its embedding.
+    Store a single job and its embedding.
     """
     collection.upsert(
         ids=[job_id],
         documents=[job_text],
         embeddings=[embedding],
         metadatas=[metadata]
+    )
+
+
+def add_jobs_batch(
+    job_ids: list[str],
+    job_texts: list[str],
+    embeddings: list[list[float]],
+    metadatas: list[dict]
+):
+    """
+    Batch upsert multiple jobs and their embeddings into ChromaDB.
+    """
+    if not job_ids:
+        return
+    collection.upsert(
+        ids=job_ids,
+        documents=job_texts,
+        embeddings=embeddings,
+        metadatas=metadatas
     )
 
 

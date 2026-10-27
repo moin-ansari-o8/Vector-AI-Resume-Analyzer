@@ -15,3 +15,12 @@ sentence-transformers
 easyocr>=1.7.0
 Pillow>=10.0.0
 python-dotenv>=1.0.0
+pandas>=2.0.0
+openpyxl>=3.1.0
+matplotlib>=3.8.0
+seaborn>=0.13.0
+scikit-learn>=1.4.0
+nbformat>=5.9.0
+ipykernel
+datasets>=2.14.0
+accelerate>=1.1.0

@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router';
-import { Search, Bell, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { cn } from '@/utils/cn';
 
 // ─── Breadcrumb Mapping ────────────────────────────────────────────
@@ -70,30 +70,6 @@ export function TopBar({ className }: TopBarProps) {
         ))}
       </nav>
 
-      {/* Right: Actions */}
-      <div className="flex items-center gap-2">
-        {/* Search */}
-        <button
-          className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-border-default text-text-muted text-sm hover:border-border-hover hover:text-text-secondary transition-colors duration-fast"
-          aria-label="Search"
-        >
-          <Search size={14} />
-          <span className="hidden sm:inline">Search...</span>
-          <kbd className="hidden sm:inline ml-4 text-[10px] text-text-muted bg-bg-hover px-1.5 py-0.5 rounded font-mono">
-            ⌘K
-          </kbd>
-        </button>
-
-        {/* Notifications */}
-        <button
-          className="relative p-2 rounded-md text-text-muted hover:text-text-primary hover:bg-bg-hover transition-colors duration-fast"
-          aria-label="Notifications"
-        >
-          <Bell size={16} />
-          {/* Notification dot */}
-          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-accent-primary" />
-        </button>
-      </div>
     </header>
   );
 }

@@ -3,16 +3,12 @@ import type { Resume } from '@/types/resume.types';
 
 interface OriginalResumeProps {
   resume: Resume | null;
-  highlightedSection?: string | null;
-  highlightedOriginalText?: string | null;
-  onSelectLine?: (text: string, section: string) => void;
+  className?: string;
 }
 
 export function OriginalResume({
   resume,
-  highlightedSection,
-  highlightedOriginalText,
-  onSelectLine,
+  className,
 }: OriginalResumeProps) {
   if (!resume) {
     return (
@@ -27,9 +23,7 @@ export function OriginalResume({
       <DocumentViewer
         resume={resume}
         resumeId={resume.id}
-        highlightedSection={highlightedSection}
-        highlightedOriginalText={highlightedOriginalText}
-        onSelectLine={onSelectLine}
+        className={className}
       />
     </div>
   );

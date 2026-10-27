@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bot, X, Send, Minus } from 'lucide-react';
 import { useChat } from '@/hooks/useChat';
@@ -7,8 +8,14 @@ import { SuggestedPrompts } from './SuggestedPrompts';
 import { useResumeStore } from '@/stores/useResumeStore';
 
 export function AIChat() {
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
+  
+  // Do not render floating chatbox if user is on improvement page or resume detail page (they have their own dedicated workspace chat)
+  if (location.pathname.startsWith('/improvement') || location.pathname.startsWith('/resumes/')) {
+    return null;
+  }
   
   const selectedResumeId = useResumeStore(state => state.selectedResumeId);
   const resumes = useResumeStore(state => state.resumes);
@@ -124,7 +131,6 @@ export function AIChat() {
               {messages.length === 0 && (
                 <SuggestedPrompts 
                   prompts={[
-                    "Summarize this candidate's strengths.",
                     "What are the red flags?",
                     "Generate 3 technical interview questions."
                   ]}

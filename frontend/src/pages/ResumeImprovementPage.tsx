@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router';
-import { ArrowLeft, Save, Download, Sparkles, User, Briefcase } from 'lucide-react';
-import { Button } from '@/components/shared/Button';
+import { ArrowLeft, User, Sparkles } from 'lucide-react';
 import { ImprovementWorkspace } from '@/components/improvement/ImprovementWorkspace';
-import { useToast } from '@/components/shared/Toast';
 import { useResumeStore } from '@/stores/useResumeStore';
+import { useJobStore } from '@/stores/useJobStore';
 import { resumeService } from '@/services/resume.service';
-import { resumeApi } from '@/api/resume.api';
+import { jobService } from '@/services/job.service';
+import { matchingApi } from '@/api/matching.api';
 import { ROUTES } from '@/constants/routes';
 import type { Resume } from '@/types/resume.types';
 
@@ -14,16 +14,84 @@ export function ResumeImprovementPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { id: pathId } = useParams<{ id?: string }>();
-  const { addToast } = useToast();
 
   const resumes = useResumeStore((state) => state.resumes);
   const setResumes = useResumeStore((state) => state.setResumes);
   const selectedResumeId = useResumeStore((state) => state.selectedResumeId);
   const selectResume = useResumeStore((state) => state.selectResume);
 
+  const jobs = useJobStore((state) => state.jobs);
+  const setJobs = useJobStore((state) => state.setJobs);
+
   const [activeResume, setActiveResume] = useState<Resume | null>(null);
-  const [targetRole, setTargetRole] = useState('Senior Backend Engineer');
+  const [targetRole, setTargetRole] = useState('Software Engineer');
   const [isLoading, setIsLoading] = useState(true);
+  const [matchedRoles, setMatchedRoles] = useState<string[]>([]);
+
+  // Fetch jobs from DB to populate target options dynamically
+  useEffect(() => {
+    if (jobs.length === 0) {
+      jobService.getAll().then(setJobs);
+    }
+  }, [jobs.length, setJobs]);
+
+  // AI Vector Matching: Query ChromaDB & SentenceTransformer for roles semantically relevant to this resume
+  useEffect(() => {
+    if (!activeResume) return;
+
+    const resumeText = activeResume.raw_text || Object.values(activeResume.sections || {}).join('\n\n');
+    if (!resumeText.trim()) return;
+
+    matchingApi.getTopMatchesForResume(resumeText, 25)
+      .then((matches) => {
+        if (matches && matches.length > 0) {
+          const titles = matches
+            .map((m: any) => (m.title || m.role || '').trim())
+            .filter((t: string) => t && t.toLowerCase() !== (activeResume.role || '').toLowerCase());
+          const uniqueTitles = Array.from(new Set(titles));
+          setMatchedRoles(uniqueTitles);
+        }
+      })
+      .catch((err) => {
+        console.warn('AI matching for target dropdown failed, falling back to skill overlap:', err);
+      });
+  }, [activeResume?.id, activeResume?.raw_text]);
+
+  // Fallback: Filter database jobs that share at least one skill or domain keyword with the candidate
+  const fallbackRelevantRoles = useMemo(() => {
+    if (!activeResume) return [];
+    const candSkills = (activeResume.skills || []).map((s) => s.toLowerCase());
+    const candRole = (activeResume.role || '').toLowerCase();
+
+    return jobs
+      .filter((j) => {
+        const req = (j.requiredSkills || []).map((s) => s.toLowerCase());
+        const hasSkillOverlap = req.some((s) =>
+          candSkills.some((cs) => cs.includes(s) || s.includes(cs))
+        );
+        const titleLower = (j.role || j.title || '').toLowerCase();
+        const hasTitleOverlap = candRole && (titleLower.includes(candRole) || candRole.includes(titleLower));
+        return hasSkillOverlap || hasTitleOverlap;
+      })
+      .map((j) => (j.role || j.title || '').trim())
+      .filter(Boolean);
+  }, [jobs, activeResume]);
+
+  // AI-filtered relevant roles (excluding unrelated domains like Accountant/Teacher for a Tech resume)
+  const displayedRoles = useMemo(() => {
+    const list = matchedRoles.length > 0 ? matchedRoles : Array.from(new Set(fallbackRelevantRoles));
+    const currentLower = (activeResume?.role || '').toLowerCase();
+    return list.filter((r) => r.toLowerCase() !== currentLower);
+  }, [matchedRoles, fallbackRelevantRoles, activeResume?.role]);
+
+  // Sync target role to candidate's detected role if available
+  useEffect(() => {
+    if (activeResume?.role) {
+      setTargetRole(activeResume.role);
+    } else if (displayedRoles.length > 0) {
+      setTargetRole(displayedRoles[0]);
+    }
+  }, [activeResume?.id, activeResume?.role, displayedRoles]);
 
   // Initial load
   useEffect(() => {
@@ -69,7 +137,6 @@ export function ResumeImprovementPage() {
     });
   }, [pathId, location.search]);
 
-
   const handleSelectResume = (id: string) => {
     selectResume(id);
     const found = resumes.find((r) => r.id === id);
@@ -79,21 +146,6 @@ export function ResumeImprovementPage() {
       resumeService.getById(id).then(setActiveResume);
     }
   };
-
-  const handleSaveChanges = async () => {
-    if (!activeResume) return;
-    try {
-      await resumeService.update(activeResume.id, {
-        sections: activeResume.sections,
-        raw_text: activeResume.raw_text,
-      });
-      addToast('All resume improvements saved to database!', 'success');
-    } catch (e) {
-      addToast('Failed to save changes', 'error');
-    }
-  };
-
-  const pdfUrl = activeResume ? resumeApi.getPdfUrl(activeResume.id) : '';
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] -m-4 sm:-m-8">
@@ -144,41 +196,28 @@ export function ResumeImprovementPage() {
               <span className="text-border-default">|</span>
 
               <div className="flex items-center gap-1.5 text-text-secondary">
-                <Briefcase size={13} className="text-text-muted" />
+                <Sparkles size={13} className="text-accent-primary" />
                 <span>Target:</span>
                 <select
                   value={targetRole}
                   onChange={(e) => setTargetRole(e.target.value)}
                   className="bg-bg-elevated border border-border-default rounded px-2 py-0.5 text-text-primary font-medium focus:outline-none focus:ring-1 focus:ring-accent-primary"
                 >
-                  <option value="Senior Backend Engineer">Senior Backend Engineer</option>
-                  <option value="Python Developer">Python Developer</option>
-                  <option value="Full Stack Developer">Full Stack Developer</option>
-                  <option value="Machine Learning Engineer">Machine Learning Engineer</option>
-                  <option value="Cloud / DevOps Engineer">Cloud / DevOps Engineer</option>
+                  {activeResume?.role && (
+                    <option value={activeResume.role}>{activeResume.role} (Current)</option>
+                  )}
+                  {displayedRoles.map((role) => (
+                    <option key={role} value={role}>
+                      {role}
+                    </option>
+                  ))}
+                  {displayedRoles.length === 0 && !activeResume?.role && (
+                    <option value="Software Engineer">Software Engineer</option>
+                  )}
                 </select>
               </div>
             </div>
           </div>
-        </div>
-        
-        {/* Actions */}
-        <div className="flex items-center gap-2">
-          {pdfUrl && (
-            <a href={pdfUrl} download className="inline-block">
-              <Button variant="secondary" size="sm" icon={<Download size={14} />}>
-                PDF
-              </Button>
-            </a>
-          )}
-          <Button
-            variant="primary"
-            size="sm"
-            icon={<Save size={14} />}
-            onClick={handleSaveChanges}
-          >
-            Save Changes
-          </Button>
         </div>
       </div>
 

@@ -52,17 +52,13 @@ def career_chat(
         content=request.question
     )
 
-    # If target_job provided, prepend to question context
-    effective_question = request.question
-    if request.target_job:
-        effective_question = f"[Target Role: {request.target_job}] {request.question}"
-
     answer = answer_career_question(
-        question=effective_question,
+        question=request.question,
         resume_text=request.resume_text,
         resume_skills=request.resume_skills or [],
         resume_experience=float(request.resume_experience or 0.0),
-        history=history
+        history=history,
+        target_job=request.target_job
     )
 
     add_message(
